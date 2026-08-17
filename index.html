@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>โรงเรียนบูกิตประชาอุปถัมภ์</title>
+  <meta name="description" content="โรงเรียนบูกิตประชาอุปถัมภ์ อ.เจาะไอร้อง จ.นราธิวาส - ยินดีต้อนรับสู่หน้าเว็บหลัก" />
+  <style>
+    :root{
+      --green-900: #0b5d3b;
+      --green-700: #107a4d;
+      --green-500: #34b57a;
+      --green-300: #9be6c8;
+      --text: #063628;
+      --muted: #14593f;
+      --card: #f7fffb;
+      font-family: "Noto Sans", "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(180deg, var(--green-300) 0%, #ffffff 100%);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .container{
+      width:100%;
+      max-width:980px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), var(--card));
+      border-radius:12px;
+      box-shadow: 0 8px 28px rgba(6,54,40,0.12);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
+    header{
+      background: linear-gradient(90deg, var(--green-900), var(--green-700));
+      color:#fff;
+      padding:28px 32px;
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+    .logo {
+      width:72px;
+      height:72px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size:20px;
+      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.08);
+    }
+    header h1{
+      margin:0;
+      font-size:20px;
+      line-height:1.05;
+    }
+    header p{
+      margin:0;
+      opacity:0.9;
+      font-size:13px;
+    }
+    main{
+      padding:40px 32px;
+      display:flex;
+      gap:32px;
+      flex-direction:column;
+      align-items:flex-start;
+    }
+    .hero{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .welcome{
+      font-size:28px;
+      font-weight:700;
+      color:var(--muted);
+      margin:0;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      opacity:0.88;
+      font-size:15px;
+    }
+    .actions{
+      margin-top:14px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 18px;
+      border-radius:10px;
+      text-decoration:none;
+      font-weight:600;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .08s ease;
+    }
+    .btn-primary{
+      background: linear-gradient(180deg,var(--green-700),var(--green-500));
+      color:white;
+      box-shadow: 0 6px 18px rgba(16,122,77,0.22);
+    }
+    .btn-primary:hover{ transform: translateY(-2px); }
+    .btn-outline{
+      background:transparent;
+      border:2px solid var(--green-700);
+      color:var(--green-700);
+    }
+    .info-card{
+      background: #ffffff;
+      border-radius:10px;
+      padding:18px;
+      box-shadow: 0 6px 18px rgba(6,54,40,0.04);
+      width:100%;
+    }
+    footer{
+      padding:18px 24px;
+      background:transparent;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:13px;
+      color:var(--muted);
+    }
+    @media (min-width:820px){
+      main{flex-direction:row; align-items:center; justify-content:space-between;}
+      .hero{max-width:60%}
+      .info-card{max-width:36%}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div class="logo" aria-hidden="true">บพอ.</div>
+      <div>
+        <h1>โรงเรียนบูกิตประชาอุปถัมภ์</h1>
+        <p>อำเภอเจาะไอร้อง จังหวัดนราธิวาส</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="hero" aria-labelledby="welcome-title">
+        <h2 id="welcome-title" class="welcome">ยินดีต้อนรับ</h2>
+        <p class="subtitle">ยินดีต้อนรับสู่เว็บไซต์อย่างเป็นทางการของโรงเรียนบูกิตประชาอุปถัมภ์ — สิ่งแวดล้อมการเรียนรู้ที่อบอุ่นและยั่งยืน</p>
+
+        <div class="actions" role="navigation" aria-label="ลิงค์ระบบ">
+          <!-- เปลี่ยน href เป็น URL ระบบนิเทศออนไลน์จริง -->
+          <a class="btn btn-primary" href="https://nited1.example.com/online-supervision" target="_blank" rel="noopener noreferrer">
+            เข้าสู่ระบบนิเทศออนไลน์
+          </a>
+          <a class="btn btn-outline" href="#about">
+            เกี่ยวกับโรงเรียน
+          </a>
+        </div>
+      </div>
+
+      <aside class="info-card" aria-labelledby="info-title">
+        <h3 id="info-title" style="margin:0 0 8px 0;">ข้อมูลด่วน</h3>
+        <p style="margin:0 0 8px 0;">ที่อยู่: ตำบลเจาะไอร้อง อำเภอเจาะไอร้อง จังหวัดนราธิวาส</p>
+        <p style="margin:0 0 8px 0;">โทรศัพท์: 0x-xxx-xxxx (ตัวอย่าง)</p>
+        <p style="margin:0; font-size:13px; color:#2f5f45;">หากต้องการเปลี่ยนลิงค์ระบบนิเทศออนไลน์ ให้แก้ค่า href ของปุ่ม "เข้าสู่ระบบนิเทศออนไลน์" ในไฟล์นี้</p>
+      </aside>
+    </main>
+
+    <footer>
+      <div>© โรงเรียนบูกิตประชาอุปถัมภ์</div>
+      <div>ออกแบบโดย คณะผู้ดูแลเว็บไซต์</div>
+    </footer>
+  </div>
+</body>
+</html>
