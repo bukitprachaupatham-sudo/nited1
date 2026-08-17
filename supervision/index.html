@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ระบบนิเทศภายใน - โรงเรียนบูกิตประชาอุปถัมภ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--g900:#0b5d3b;--g700:#107a4d;--g500:#34b57a;--g300:#9be6c8;--g100:#e8f8f0;
+--txt:#1a1a2e;--txt2:#4a4a6a;--txt3:#8888aa;
+--bg:#f0f4f8;--card:#fff;--card2:#f7faf9;
+--bdr:#d0dde5;--bdr2:#e8eef3;
+--r:12px;--r2:8px;
+--sh:0 2px 12px rgba(0,0,0,0.08);--sh2:0 4px 24px rgba(0,0,0,0.1);
+--font:'IBM Plex Sans Thai','Segoe UI',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+a{color:var(--g700);text-decoration:none}
+button{font-family:var(--font);cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:var(--font);border:1.5px solid var(--bdr);border-radius:var(--r2);padding:10px 14px;font-size:14px;width:100%;transition:border .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(52,181,122,0.15)}
+textarea{resize:vertical;min-height:80px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--r2);font-weight:600;font-size:14px;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--sh)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:linear-gradient(135deg,var(--g700),var(--g500));color:#fff}
+.btn-secondary{background:var(--g100);color:var(--g700)}
+.btn-danger{background:#fee2e2;color:#dc2626}
+.btn-danger:hover{background:#fecaca}
+.btn-outline{background:transparent;border:1.5px solid var(--g500);color:var(--g700)}
+.btn-sm{padding:6px 14px;font-size:12px}
+
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-pending{background:#fef3c7;color:#d97706}
+.badge-confirmed{background:#d1fae5;color:#059669}
+.badge-completed{background:#dbeafe;color:#2563eb}
+.badge-rejected{background:#fee2e2;color:#dc2626}
+.badge-waiting{background:#fef3c7;color:#d97706}
+.badge-approved{background:#d1fae5;color:#059669}
+.badge-revision{background:#fee2e2;color:#dc2626}
+.badge-quality{background:#ede9fe;color:#7c3aed}
+
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:24px;margin-bottom:16px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-title{font-size:16px;font-weight:700;color:var(--txt)}
+
+.table-wrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--g100);color:var(--g900);padding:10px 12px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+tr:hover td{background:var(--card2)}
+
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+.stat-card{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--sh);display:flex;align-items:center;gap:16px}
+.stat-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.stat-icon.blue{background:#dbeafe;color:#2563eb}
+.stat-icon.green{background:#d1fae5;color:#059669}
+.stat-icon.yellow{background:#fef3c7;color:#d97706}
+.stat-icon.red{background:#fee2e2;color:#dc2626}
+.stat-icon.purple{background:#ede9fe;color:#7c3aed}
+.stat-info h3{font-size:28px;font-weight:700;line-height:1.2}
+.stat-info p{font-size:13px;color:var(--txt3)}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;visibility:hidden;transition:all .3s}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal{background:var(--card);border-radius:var(--r);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh2);transform:translateY(20px);transition:transform .3s}
+.modal-overlay.active .modal{transform:translateY(0)}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--bdr2);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:18px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--bg);color:var(--txt2);transition:all .2s}
+.modal-close:hover{background:#fee2e2;color:#dc2626}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--bdr2);display:flex;gap:10px;justify-content:flex-end}
+
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:6px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+
+/* LOGIN */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--g900) 0%,var(--g700) 50%,var(--g500) 100%);padding:20px}
+.login-card{background:var(--card);border-radius:16px;padding:40px;width:100%;max-width:420px;box-shadow:var(--sh2)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .icon{width:72px;height:72px;border-radius:16px;background:var(--g100);display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px}
+.login-logo h2{font-size:20px;color:var(--g900)}
+.login-logo p{font-size:13px;color:var(--txt3)}
+.login-tabs{display:flex;border-radius:var(--r2);background:var(--bg);padding:4px;margin-bottom:24px}
+.login-tab{flex:1;padding:10px;text-align:center;border-radius:6px;font-size:13px;font-weight:600;color:var(--txt3);transition:all .2s}
+.login-tab.active{background:var(--card);color:var(--g700);box-shadow:var(--sh)}
+#adminFields{display:none}
+.login-error{background:#fee2e2;color:#dc2626;padding:10px;border-radius:var(--r2);font-size:13px;margin-bottom:12px;display:none}
+
+/* SIDEBAR */
+#appPage{display:none;min-height:100vh}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:260px;background:linear-gradient(180deg,var(--g900),var(--g700));color:#fff;position:fixed;top:0;left:0;height:100vh;z-index:100;display:flex;flex-direction:column;transition:transform .3s}
+.sidebar-header{padding:20px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.sidebar-header h2{font-size:15px;font-weight:700}
+.sidebar-header p{font-size:11px;opacity:0.7}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,0.7);font-size:14px;font-weight:500;transition:all .2s;border-left:3px solid transparent;cursor:pointer}
+.nav-item:hover{background:rgba(255,255,255,0.1);color:#fff}
+.nav-item.active{background:rgba(255,255,255,0.15);color:#fff;border-left-color:var(--g300)}
+.nav-item .icon{font-size:18px;width:24px;text-align:center}
+.nav-divider{border-top:1px solid rgba(255,255,255,0.1);margin:8px 20px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;opacity:0.5;text-align:center}
+.main-content{margin-left:260px;flex:1;min-height:100vh}
+.topbar{background:var(--card);border-bottom:1px solid var(--bdr2);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50}
+.topbar h1{font-size:18px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-user{font-size:13px;color:var(--txt2)}
+.topbar-logout{font-size:12px;color:#dc2626;cursor:pointer;font-weight:600}
+.content{padding:24px 28px}
+
+.mobile-toggle{display:none;position:fixed;top:12px;left:12px;z-index:150;width:40px;height:40px;border-radius:var(--r2);background:var(--g700);color:#fff;font-size:20px;align-items:center;justify-content:center}
+@media(max-width:768px){
+.sidebar{transform:translateX(-100%)}
+.sidebar.open{transform:translateX(0)}
+.main-content{margin-left:0}
+.mobile-toggle{display:flex}
+.topbar{padding-left:60px}
+.content{padding:16px}
+}
+
+.page{display:none}
+.page.active{display:block}
+
+.calendar{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.cal-header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--g700);color:#fff}
+.cal-header h3{font-size:16px}
+.cal-header button{background:rgba(255,255,255,0.2);color:#fff;border:none;width:32px;height:32px;border-radius:50%;font-size:16px;transition:background .2s}
+.cal-header button:hover{background:rgba(255,255,255,0.3)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bdr2)}
+.cal-day-name{background:var(--g100);padding:8px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--g900)}
+.cal-day{background:var(--card);padding:8px 4px;min-height:60px;font-size:12px;cursor:pointer;transition:background .2s}
+.cal-day:hover{background:var(--g100)}
+.cal-day.empty{background:var(--bg);cursor:default}
+.cal-day.today{background:#dbeafe}
+.cal-day.has-booking{position:relative}
+.cal-day .day-num{font-weight:600;margin-bottom:2px}
+.cal-day .dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin:1px}
+.cal-day .dot.confirmed{background:#059669}
+.cal-day .dot.pending{background:#d97706}
+.cal-day .dot.completed{background:#2563eb}
+.cal-day .dot.rejected{background:#dc2626}
+
+.empty-state{text-align:center;padding:48px 24px;color:var(--txt3)}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:0.5}
+.empty-state p{font-size:14px}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--g900);color:#fff;padding:14px 24px;border-radius:var(--r2);font-size:14px;font-weight:500;z-index:2000;box-shadow:var(--sh2);transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:#dc2626}
+
+.loading{display:flex;align-items:center;justify-content:center;padding:40px}
+.spinner{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--g500);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.filter-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-bar select,.filter-bar input{width:auto;min-width:160px;padding:8px 12px;font-size:13px}
+
+.report-section{margin-bottom:24px}
+.report-section h3{font-size:16px;font-weight:700;color:var(--g900);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--g300)}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🏫</div>
+      <h2>ระบบนิเทศภายใน</h2>
+      <p>โรงเรียนบูกิตประชาอุปถัมภ์</p>
+    </div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchLoginTab('teacher')">ครูผู้สอน</div>
+      <div class="login-tab" onclick="switchLoginTab('admin')">ผู้ดูแลระบบ</div>
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <div id="teacherFields">
+      <div class="form-group">
+        <label>ชื่อ-นามสกุล</label>
+        <input type="text" id="loginName" placeholder="กรอกชื่อ-นามสกุล">
+      </div>
+      <div class="form-group">
+        <label>กลุ่มสาระการเรียนรู้</label>
+        <select id="loginDept">
+          <option value="">-- เลือกกลุ่มสาระ --</option>
+          <option>กลุ่มสาระภาษาไทย</option>
+          <option>กลุ่มสาระคณิตศาสตร์</option>
+          <option>กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
+          <option>กลุ่มสาระสังคมศึกษา ศาสนาและวัฒนธรรม</option>
+          <option>กลุ่มสาระสุขศึกษาและพลศึกษา</option>
+          <option>กลุ่มสาระศิลปะ</option>
+          <option>กลุ่มสาระการงานอาชีพและเทคโนโลยี</option>
+          <option>กลุ่มสาระภาษาต่างประเทศ</option>
+        </select>
+      </div>
+    </div>
+    <div id="adminFields">
+      <div class="form-group">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน">
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doLogin()">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<div id="appPage">
+  <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>🏫 ระบบนิเทศ</h2>
+        <p>โรงเรียนบูกิตประชาอุปถัมภ์</p>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" onclick="navigateTo('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="nav-item" onclick="navigateTo('booking')"><span class="icon">📅</span> จองวันนิเทศ</div>
+        <div class="nav-item" onclick="navigateTo('files')"><span class="icon">📁</span> ส่งไฟล์งาน</div>
+        <div class="nav-item" onclick="navigateTo('evaluation')"><span class="icon">📝</span> ประเมินผล</div>
+        <div class="nav-divider"></div>
+        <div class="nav-item admin-only" onclick="navigateTo('admin')"><span class="icon">⚙️</span> จัดการระบบ</div>
+        <div class="nav-item admin-only" onclick="navigateTo('reports')"><span class="icon">📈</span> รายงาน</div>
+        <div class="nav-divider"></div>
+        <div class="nav-item" onclick="navigateTo('myreport')"><span class="icon">👤</span> รายงานของฉัน</div>
+      </nav>
+      <div class="sidebar-footer">© 2026 โรงเรียนบูกิตประชาอุปถัมภ์</div>
+    </aside>
+    <div class="main-content">
+      <div class="topbar">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="topbar-right">
+          <span class="topbar-user" id="topbarUser"></span>
+          <span class="topbar-logout" onclick="doLogout()">ออกจากระบบ</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="grid grid-4" id="dashStats"></div>
+          <div class="grid grid-2" style="margin-top:16px">
+            <div>
+              <div class="card">
+                <div class="card-header"><span class="card-title">ปฏิทินการจอง</span></div>
+                <div id="dashboardCalendar"></div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <div class="card-header"><span class="card-title">การจองล่าสุด</span></div>
+                <div class="table-wrap"><table><thead><tr><th>วันที่</th><th>ครู</th><th>วิชา</th><th>สถานะ</th></tr></thead><tbody id="dashBookingTable"></tbody></table></div>
+              </div>
+              <div class="card">
+                <div class="card-header"><span class="card-title">ไฟล์งานล่าสุด</span></div>
+                <div class="table-wrap"><table><thead><tr><th>ครู</th><th>ประเภท</th><th>สถานะ</th></tr></thead><tbody id="dashFileTable"></tbody></table></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOOKING -->
+        <div class="page" id="page-booking">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">แบบฟอร์มจองวันนิเทศ</span>
+              <button class="btn btn-secondary btn-sm" onclick="loadMyBookings()">🔄 รีเฟรช</button>
+            </div>
+            <form id="bookingForm" onsubmit="submitBooking(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>วันที่นิเทศ *</label>
+                  <input type="date" id="bkDate" required>
+                </div>
+                <div class="form-group">
+                  <label>ช่วงเวลา *</label>
+                  <select id="bkTime" required>
+                    <option value="">-- เลือกช่วงเวลา --</option>
+                    <option>08:30-09:30</option>
+                    <option>09:30-10:30</option>
+                    <option>10:30-11:30</option>
+                    <option>13:00-14:00</option>
+                    <option>14:00-15:00</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>คาบที่ *</label>
+                  <select id="bkPeriod" required>
+                    <option value="">-- เลือกคาบ --</option>
+                    <option>คาบที่ 1 (08:30-09:30)</option>
+                    <option>คาบที่ 2 (09:30-10:30)</option>
+                    <option>คาบที่ 3 (10:30-11:30)</option>
+                    <option>คาบที่ 4 (13:00-14:00)</option>
+                    <option>คาบที่ 5 (14:00-15:00)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>กลุ่มสาระการเรียนรู้ *</label>
+                  <select id="bkDept" required>
+                    <option value="">-- เลือกกลุ่มสาระ --</option>
+                    <option>กลุ่มสาระภาษาไทย</option>
+                    <option>กลุ่มสาระคณิตศาสตร์</option>
+                    <option>กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
+                    <option>กลุ่มสาระสังคมศึกษา ศาสนาและวัฒนธรรม</option>
+                    <option>กลุ่มสาระสุขศึกษาและพลศึกษา</option>
+                    <option>กลุ่มสาระศิลปะ</option>
+                    <option>กลุ่มสาระการงานอาชีพและเทคโนโลยี</option>
+                    <option>กลุ่มสาระภาษาต่างประเทศ</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ชื่อวิชา *</label>
+                  <input type="text" id="bkSubject" placeholder="ชื่อวิชา" required>
+                </div>
+                <div class="form-group">
+                  <label>รหัสวิชา</label>
+                  <input type="text" id="bkCode" placeholder="รหัสวิชา">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ระดับชั้น *</label>
+                  <select id="bkLevel" required>
+                    <option value="">-- เลือกชั้นเรียน --</option>
+                    <option>ป.1</option><option>ป.2</option><option>ป.3</option>
+                    <option>ป.4</option><option>ป.5</option><option>ป.6</option>
+                    <option>ม.1</option><option>ม.2</option><option>ม.3</option>
+                    <option>ม.4</option><option>ม.5</option><option>ม.6</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>ห้องเรียน *</label>
+                  <input type="text" id="bkRoom" placeholder="เช่น ป.4/1" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>หมายเหตุ</label>
+                <textarea id="bkNote" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">📅 ยืนยันการจอง</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">รายการจองของฉัน</span></div>
+            <div class="table-wrap">
+              <table><thead><tr><th>วันที่</th><th>เวลา</th><th>วิชา</th><th>ชั้น</th><th>สถานะ</th></tr></thead><tbody id="myBookingTable"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILES -->
+        <div class="page" id="page-files">
+          <div class="card">
+            <div class="card-header"><span class="card-title">อัพโหลดไฟล์งาน</span></div>
+            <form id="fileForm" onsubmit="submitFile(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ประเภทไฟล์ *</label>
+                  <select id="flType" required onchange="toggleFileInput()">
+                    <option value="">-- เลือกประเภท --</option>
+                    <option value="แผนการสอน">แผนการสอน (PDF/Word)</option>
+                    <option value="สื่อการสอน">สื่อการสอน (รูปภาพ/PPT/PDF)</option>
+                    <option value="ภาพกิจกรรม">ภาพกิจกรรม (รูปภาพ)</option>
+                    <option value="คลิปวิดีโอ">คลิปวิดีโอ (ลิงก์ YouTube/Drive)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>เชื่อมโยงกับการจอง</label>
+                  <select id="flBookingRef">
+                    <option value="">-- เลือกการจอง (ถ้ามี) --</option>
+                  </select>
+                </div>
+              </div>
+              <div id="fileUploadGroup" class="form-group">
+                <label>เลือกไฟล์ *</label>
+                <input type="file" id="flFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.gif">
+              </div>
+              <div id="fileLinkGroup" class="form-group" style="display:none">
+                <label>ลิงก์วิดีโอ (YouTube / Google Drive) *</label>
+                <input type="url" id="flLink" placeholder="https://...">
+              </div>
+              <div class="form-group">
+                <label>หมายเหตุ</label>
+                <textarea id="flNote" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">📤 อัพโหลด</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">ไฟล์งานที่ส่งแล้ว</span></div>
+            <div class="table-wrap">
+              <table><thead><tr><th>วันที่ส่ง</th><th>ประเภท</th><th>ชื่อไฟล์</th><th>สถานะ</th><th>ลิงก์</th></tr></thead><tbody id="myFileTable"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- EVALUATION -->
+        <div class="page" id="page-evaluation">
+          <div class="card admin-only">
+            <div class="card-header"><span class="card-title">บันทึกผลการนิเทศ/ประเมิน</span></div>
+            <form id="evalForm" onsubmit="submitEvaluation(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ชื่อครูผู้สอนที่นิเทศ *</label>
+                  <select id="evTeacher" required><option value="">-- เลือกครู --</option></select>
+                </div>
+                <div class="form-group">
+                  <label>วันที่นิเทศ *</label>
+                  <input type="date" id="evDate" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>จุดเด่น *</label>
+                <textarea id="evStrengths" required placeholder="จุดเด่นจากการสังเกตการสอน..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>จุดพัฒนา *</label>
+                <textarea id="evImprovements" required placeholder="สิ่งที่ควรพัฒนา..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>ข้อเสนอแนะ</label>
+                <textarea id="evSuggestions" placeholder="ข้อเสนอแนะเพิ่มเติม..."></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>ระดับคุณภาพ *</label>
+                  <select id="evQuality" required>
+                    <option value="">-- เลือกระดับ --</option>
+                    <option>ดีมาก</option><option>ดี</option><option>พอใช้</option><option>ปรับปรุง</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>สรุปผล</label>
+                  <input type="text" id="evSummary" placeholder="สรุปผลการนิเทศ">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">📝 บันทึกผลการประเมิน</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">ผลการประเมินล่าสุด</span></div>
+            <div class="table-wrap">
+              <table><thead><tr><th>วันที่</th><th>ครู</th><th>วันที่นิเทศ</th><th>ระดับ</th><th>ผู้ประเมิน</th></tr></thead><tbody id="evalTable"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div class="page" id="page-admin">
+          <div class="grid grid-3" style="margin-bottom:16px">
+            <button class="btn btn-primary" onclick="showAdminTab('manage')" id="admTab1" style="justify-content:center">📅 จัดการการจอง</button>
+            <button class="btn btn-outline" onclick="showAdminTab('check')" id="admTab2" style="justify-content:center">📁 ตรวจไฟล์งาน</button>
+            <button class="btn btn-outline" onclick="showAdminTab('settings')" id="admTab3" style="justify-content:center">⚙️ ตั้งค่า</button>
+          </div>
+
+          <div id="adminManage">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">จัดการการจอง</span>
+                <button class="btn btn-secondary btn-sm" onclick="loadAdminBookings()">🔄 รีเฟรช</button>
+              </div>
+              <div class="filter-bar">
+                <select id="admFilterStatus" onchange="loadAdminBookings()">
+                  <option value="">ทั้งหมด</option>
+                  <option>รอดำเนินการ</option><option>ยืนยันแล้ว</option><option>นิเทศแล้ว</option><option>ปฏิเสธ</option>
+                </select>
+                <input type="date" id="admFilterDateFrom" onchange="loadAdminBookings()" placeholder="ตั้งแต่วันที่">
+                <input type="date" id="admFilterDateTo" onchange="loadAdminBookings()" placeholder="ถึงวันที่">
+              </div>
+              <div class="table-wrap">
+                <table><thead><tr><th>วันที่</th><th>เวลา</th><th>ครู</th><th>กลุ่มสาระ</th><th>วิชา</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="adminBookingTable"></tbody></table>
+              </div>
+            </div>
+          </div>
+
+          <div id="adminCheck" style="display:none">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">ตรวจไฟล์งาน</span>
+                <button class="btn btn-secondary btn-sm" onclick="loadAdminFiles()">🔄 รีเฟรช</button>
+              </div>
+              <div class="filter-bar">
+                <select id="admFilterFileType" onchange="loadAdminFiles()">
+                  <option value="">ทั้งหมด</option>
+                  <option>แผนการสอน</option><option>สื่อการสอน</option><option>ภาพกิจกรรม</option><option>คลิปวิดีโอ</option>
+                </select>
+                <select id="admFilterFileStatus" onchange="loadAdminFiles()">
+                  <option value="">ทั้งหมด</option>
+                  <option>รอตรวจสอบ</option><option>ผ่าน</option><option>ปรับปรุง</option>
+                </select>
+              </div>
+              <div class="table-wrap">
+                <table><thead><tr><th>วันที่</th><th>ครู</th><th>ประเภท</th><th>ชื่อไฟล์</th><th>สถานะ</th><th>ลิงก์</th><th>จัดการ</th></tr></thead><tbody id="adminFileTable"></tbody></table>
+              </div>
+            </div>
+          </div>
+
+          <div id="adminSettings" style="display:none">
+            <div class="card">
+              <div class="card-header"><span class="card-title">ตั้งค่าระบบ</span></div>
+              <button class="btn btn-primary" onclick="initSheets()" style="margin-bottom:12px">🔄 สร้าง/ตรวจสอบ Sheet</button>
+              <p style="font-size:13px;color:var(--txt3)">กดปุ่มด้านบนเพื่อตรวจสอบและสร้าง Google Sheets ที่จำเป็นสำหรับระบบ</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="page" id="page-reports">
+          <div class="card">
+            <div class="card-header"><span class="card-title">รายงานกลุ่มสาระการเรียนรู้</span></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>เลือกกลุ่มสาระ</label>
+                <select id="rptDept">
+                  <option value="">-- เลือกกลุ่มสาระ --</option>
+                  <option>กลุ่มสาระภาษาไทย</option><option>กลุ่มสาระคณิตศาสตร์</option>
+                  <option>กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option><option>กลุ่มสาระสังคมศึกษา ศาสนาและวัฒนธรรม</option>
+                  <option>กลุ่มสาระสุขศึกษาและพลศึกษา</option><option>กลุ่มสาระศิลปะ</option>
+                  <option>กลุ่มสาระการงานอาชีพและเทคโนโลยี</option><option>กลุ่มสาระภาษาต่างประเทศ</option>
+                </select>
+              </div>
+              <div class="form-group" style="display:flex;align-items:flex-end">
+                <button class="btn btn-primary" onclick="loadDeptReport()">📊 แสดงรายงาน</button>
+              </div>
+            </div>
+            <div id="deptReportResult"></div>
+          </div>
+        </div>
+
+        <!-- MY REPORT -->
+        <div class="page" id="page-myreport">
+          <div class="card">
+            <div class="card-header"><span class="card-title">รายงานของฉัน</span></div>
+            <div id="myReportContent"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTitle">รายละเอียด</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var CONFIG = {
+  APPS_SCRIPT_URL: '',
+  USER: null,
+  ADMIN: false
+};
+
+function api(action, data) {
+  var payload = Object.assign({action: action}, data || {});
+  return fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(payload)
+  }).then(function(r){return r.json();});
+}
+
+function showToast(msg, isError) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(function(){t.className='toast'},3500);
+}
+
+function switchLoginTab(tab) {
+  document.querySelectorAll('.login-tab').forEach(function(el,i){
+    el.classList.toggle('active', (tab==='teacher' ? i===0 : i===1));
+  });
+  document.getElementById('teacherFields').style.display = tab==='teacher' ? 'block' : 'none';
+  document.getElementById('adminFields').style.display = tab==='admin' ? 'block' : 'none';
+}
+
+function doLogin() {
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  var isAdmin = document.querySelector('.login-tab.active').textContent.includes('ผู้ดูแล');
+  if (isAdmin) {
+    var pw = document.getElementById('loginPassword').value;
+    if (!pw) { errEl.textContent='กรุณากรอกรหัสผ่าน'; errEl.style.display='block'; return; }
+    api('login', {password: pw}).then(function(r){
+      if (r.success && r.role==='admin') {
+        CONFIG.USER = {name:'ผู้ดูแลระบบ', dept:'admin'};
+        CONFIG.ADMIN = true;
+        enterApp();
+      } else {
+        errEl.textContent='รหัสผ่านไม่ถูกต้อง'; errEl.style.display='block';
+      }
+    }).catch(function(){ errEl.textContent='เชื่อมต่อไม่ได้'; errEl.style.display='block'; });
+  } else {
+    var name = document.getElementById('loginName').value.trim();
+    var dept = document.getElementById('loginDept').value;
+    if (!name) { errEl.textContent='กรุณากรอกชื่อ'; errEl.style.display='block'; return; }
+    CONFIG.USER = {name: name, dept: dept};
+    CONFIG.ADMIN = false;
+    enterApp();
+  }
+}
+
+function doLogout() {
+  CONFIG.USER = null;
+  CONFIG.ADMIN = false;
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+}
+
+function enterApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appPage').style.display = 'block';
+  document.getElementById('topbarUser').textContent = CONFIG.USER.name;
+  document.querySelectorAll('.admin-only').forEach(function(el){
+    el.style.display = CONFIG.ADMIN ? '' : 'none';
+  });
+  navigateTo('dashboard');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+var currentPage = 'dashboard';
+function navigateTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  var el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').indexOf(page)!==-1) n.classList.add('active');
+  });
+  var titles = {dashboard:'Dashboard',booking:'จองวันนิเทศ',files:'ส่งไฟล์งาน',evaluation:'ประเมินผล',admin:'จัดการระบบ',reports:'รายงาน',myreport:'รายงานของฉัน'};
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  document.getElementById('sidebar').classList.remove('open');
+  loadPageData(page);
+}
+
+function loadPageData(page) {
+  switch(page) {
+    case 'dashboard': loadDashboard(); break;
+    case 'booking': loadMyBookings(); break;
+    case 'files': loadMyFiles(); break;
+    case 'evaluation': loadEvaluations(); loadTeacherSelect(); break;
+    case 'admin': loadAdminBookings(); loadAdminFiles(); break;
+    case 'reports': break;
+    case 'myreport': loadMyReport(); break;
+  }
+}
+
+/* ===== DASHBOARD ===== */
+function loadDashboard() {
+  api('getDashboard').then(function(d){
+    if (!d.success) return;
+    var stats = document.getElementById('dashStats');
+    stats.innerHTML =
+      '<div class="stat-card"><div class="stat-icon blue">📅</div><div class="stat-info"><h3>'+(d.totalBookings||0)+'</h3><p>การจองทั้งหมด</p></div></div>' +
+      '<div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><h3>'+(d.completedBookings||0)+'</h3><p>นิเทศแล้ว</p></div></div>' +
+      '<div class="stat-card"><div class="stat-icon yellow">⏳</div><div class="stat-info"><h3>'+(d.pendingBookings||0)+'</h3><p>รอดำเนินการ</p></div></div>' +
+      '<div class="stat-card"><div class="stat-icon purple">📁</div><div class="stat-info"><h3>'+(d.totalFiles||0)+'</h3><p>ไฟล์งานทั้งหมด</p></div></div>';
+
+    var tbody = document.getElementById('dashBookingTable');
+    if (d.recentBookings && d.recentBookings.length) {
+      tbody.innerHTML = d.recentBookings.map(function(b){
+        return '<tr><td>'+fmtDate(b.date)+'</td><td>'+esc(b.teacher)+'</td><td>'+esc(b.subject)+'</td><td>'+badge(b.status)+'</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--txt3)">ยังไม่มีรายการจอง</td></tr>';
+    }
+    var ftbody = document.getElementById('dashFileTable');
+    if (d.recentFiles && d.recentFiles.length) {
+      ftbody.innerHTML = d.recentFiles.map(function(f){
+        return '<tr><td>'+esc(f.teacher)+'</td><td>'+esc(f.fileType)+'</td><td>'+badge(f.status)+'</td></tr>';
+      }).join('');
+    } else {
+      ftbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--txt3)">ยังไม่มีไฟล์งาน</td></tr>';
+    }
+    loadDashboardCalendar();
+  }).catch(function(e){console.error(e);});
+}
+
+function loadDashboardCalendar() {
+  var now = new Date();
+  renderCalendar('dashboardCalendar', now.getFullYear(), now.getMonth());
+}
+
+var calYear, calMonth, calTarget;
+function renderCalendar(containerId, year, month) {
+  calYear = year; calMonth = month; calTarget = containerId;
+  var container = document.getElementById(containerId);
+  var months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  var days = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var today = new Date();
+  var html = '<div class="calendar"><div class="cal-header">';
+  html += '<button onclick="calNav(-1)">◀</button>';
+  html += '<h3>'+months[month]+' '+year+'</h3>';
+  html += '<button onclick="calNav(1)">▶</button></div>';
+  html += '<div class="cal-grid">';
+  days.forEach(function(d){html+='<div class="cal-day-name">'+d+'</div>';});
+  for(var i=0;i<firstDay;i++) html+='<div class="cal-day empty"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var isToday = (d===today.getDate() && month===today.getMonth() && year===today.getFullYear());
+    html+='<div class="cal-day'+(isToday?' today':'')+'" onclick="calClick('+d+')"><div class="day-num">'+d+'</div><div id="cal-dots-'+d+'"></div></div>';
+  }
+  html += '</div></div>';
+  container.innerHTML = html;
+  api('getCalendarData', {month: month.toString(), year: year.toString()}).then(function(r){
+    if (r.success && r.events) {
+      var byDay = {};
+      r.events.forEach(function(e){
+        var d = new Date(e.date).getDate();
+        if (!byDay[d]) byDay[d] = [];
+        byDay[d].push(e.status);
+      });
+      Object.keys(byDay).forEach(function(d){
+        var el = document.getElementById('cal-dots-'+d);
+        if (el) {
+          var statuses = byDay[d];
+          var dotMap = {confirmed:'confirmed',pending:'pending',completed:'completed',rejected:'rejected','รอดำเนินการ':'pending','ยืนยันแล้ว':'completed','นิเทศแล้ว':'completed','ปฏิเสธ':'rejected'};
+          el.innerHTML = statuses.map(function(s){return '<span class="dot '+(dotMap[s]||'pending')+'"></span>';}).join('');
+          el.parentElement.classList.add('has-booking');
+        }
+      });
+    }
+  });
+}
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth>11){calMonth=0;calYear++;}
+  if (calMonth<0){calMonth=11;calYear--;}
+  renderCalendar(calTarget, calYear, calMonth);
+}
+function calClick(day) {
+  var dateStr = calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  api('getBookings', {dateFrom: dateStr, dateTo: dateStr}).then(function(r){
+    if (r.success && r.bookings.length) {
+      var html = '<p style="margin-bottom:12px"><strong>การจองวัน '+fmtDate(dateStr)+'</strong></p>';
+      r.bookings.forEach(function(b){
+        html += '<div style="padding:10px;background:var(--bg);border-radius:8px;margin-bottom:8px">';
+        html += '<div><strong>'+esc(b.teacher)+'</strong> - '+esc(b.subject)+'</div>';
+        html += '<div style="font-size:12px;color:var(--txt3)">'+esc(b.time)+' | '+esc(b.period)+' | '+esc(b.room)+'</div>';
+        html += '<div>'+badge(b.status)+'</div></div>';
+      });
+      openModal('การจองวันที่ '+fmtDate(dateStr), html);
+    } else {
+      openModal('วันที่ '+fmtDate(dateStr), '<p style="color:var(--txt3)">ไม่มีการจองในวันนี้</p>');
+    }
+  });
+}
+
+/* ===== BOOKING ===== */
+function submitBooking(e) {
+  e.preventDefault();
+  var data = {
+    date: document.getElementById('bkDate').value,
+    time: document.getElementById('bkTime').value,
+    period: document.getElementById('bkPeriod').value,
+    teacherName: CONFIG.USER.name,
+    department: document.getElementById('bkDept').value || CONFIG.USER.dept,
+    subjectName: document.getElementById('bkSubject').value,
+    subjectCode: document.getElementById('bkCode').value,
+    classLevel: document.getElementById('bkLevel').value,
+    room: document.getElementById('bkRoom').value,
+    note: document.getElementById('bkNote').value
+  };
+  api('addBooking', data).then(function(r){
+    if (r.success) {
+      showToast('✅ จองวันนิเทศสำเร็จ');
+      document.getElementById('bookingForm').reset();
+      loadMyBookings();
+    } else {
+      showToast(r.error || 'เกิดข้อผิดพลาด', true);
+    }
+  }).catch(function(){ showToast('เชื่อมต่อไม่ได้', true); });
+}
+
+function loadMyBookings() {
+  var filter = {};
+  if (!CONFIG.ADMIN) filter.teacherName = CONFIG.USER.name;
+  api('getBookings', filter).then(function(r){
+    if (!r.success) return;
+    var tbody = document.getElementById('myBookingTable');
+    if (r.bookings.length) {
+      tbody.innerHTML = r.bookings.map(function(b){
+        return '<tr><td>'+fmtDate(b.date)+'</td><td>'+esc(b.time)+'</td><td>'+esc(b.subject)+'</td><td>'+esc(b.level)+'</td><td>'+badge(b.status)+'</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>ยังไม่มีรายการจอง</p></td></tr>';
+    }
+    updateBookingRefSelect(r.bookings);
+  });
+}
+
+function updateBookingRefSelect(bookings) {
+  var sel = document.getElementById('flBookingRef');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- เลือกการจอง (ถ้ามี) --</option>';
+  bookings.filter(function(b){return b.status!=='ปฏิเสธ';}).forEach(function(b){
+    sel.innerHTML += '<option value="'+b.date+'|'+b.teacher+'">'+fmtDate(b.date)+' - '+b.subject+' ('+b.teacher+')</option>';
+  });
+}
+
+/* ===== FILES ===== */
+function toggleFileInput() {
+  var type = document.getElementById('flType').value;
+  document.getElementById('fileUploadGroup').style.display = type==='คลิปวิดีโอ' ? 'none' : 'block';
+  document.getElementById('fileLinkGroup').style.display = type==='คลิปวิดีโอ' ? 'block' : 'none';
+}
+
+function submitFile(e) {
+  e.preventDefault();
+  var type = document.getElementById('flType').value;
+  var note = document.getElementById('flNote').value;
+  var bookingRef = document.getElementById('flBookingRef').value;
+
+  if (type === 'คลิปวิดีโอ') {
+    var link = document.getElementById('flLink').value.trim();
+    if (!link) { showToast('กรุณากรอกลิงก์', true); return; }
+    api('uploadFile', {
+      teacherName: CONFIG.USER.name,
+      fileType: type,
+      fileName: 'คลิปวิดีโอ',
+      fileURL: link,
+      note: note,
+      bookingRef: bookingRef
+    }).then(function(r){
+      if (r.success) {
+        showToast('✅ อัพโหลดสำเร็จ');
+        document.getElementById('fileForm').reset();
+        loadMyFiles();
+      } else {
+        showToast(r.error || 'เกิดข้อผิดพลาด', true);
+      }
+    });
+  } else {
+    var fileInput = document.getElementById('flFile');
+    if (!fileInput.files.length) { showToast('กรุณาเลือกไฟล์', true); return; }
+    var file = fileInput.files[0];
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var base64 = ev.target.result.split(',')[1];
+      api('uploadFile', {
+        teacherName: CONFIG.USER.name,
+        fileType: type,
+        fileName: file.name,
+        fileData: base64,
+        mimeType: file.type,
+        note: note,
+        bookingRef: bookingRef
+      }).then(function(r){
+        if (r.success) {
+          showToast('✅ อัพโหลดสำเร็จ');
+          document.getElementById('fileForm').reset();
+          loadMyFiles();
+        } else {
+          showToast(r.error || 'เกิดข้อผิดพลาด', true);
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function loadMyFiles() {
+  api('getFiles', {teacherName: CONFIG.USER.name}).then(function(r){
+    if (!r.success) return;
+    var tbody = document.getElementById('myFileTable');
+    if (r.files.length) {
+      tbody.innerHTML = r.files.map(function(f){
+        var link = f.fileURL ? '<a href="'+esc(f.fileURL)+'" target="_blank">🔗</a>' : '-';
+        return '<tr><td>'+fmtDateTime(f.timestamp)+'</td><td>'+esc(f.fileType)+'</td><td>'+esc(f.fileName)+'</td><td>'+badge(f.status)+'</td><td>'+link+'</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>ยังไม่มีไฟล์งาน</p></td></tr>';
+    }
+  });
+}
+
+/* ===== EVALUATION ===== */
+function loadTeacherSelect() {
+  if (!CONFIG.ADMIN) return;
+  api('getBookings').then(function(r){
+    if (!r.success) return;
+    var names = {};
+    r.bookings.forEach(function(b){names[b.teacher]=true;});
+    var sel = document.getElementById('evTeacher');
+    sel.innerHTML = '<option value="">-- เลือกครู --</option>';
+    Object.keys(names).sort().forEach(function(n){
+      sel.innerHTML += '<option value="'+esc(n)+'">'+esc(n)+'</option>';
+    });
+  });
+}
+
+function submitEvaluation(e) {
+  e.preventDefault();
+  api('addEvaluation', {
+    teacherName: document.getElementById('evTeacher').value,
+    supervisionDate: document.getElementById('evDate').value,
+    strengths: document.getElementById('evStrengths').value,
+    improvements: document.getElementById('evImprovements').value,
+    suggestions: document.getElementById('evSuggestions').value,
+    qualityLevel: document.getElementById('evQuality').value,
+    summary: document.getElementById('evSummary').value,
+    evaluatorName: CONFIG.USER.name
+  }).then(function(r){
+    if (r.success) {
+      showToast('✅ บันทึกผลการประเมินสำเร็จ');
+      document.getElementById('evalForm').reset();
+      loadEvaluations();
+    } else {
+      showToast(r.error || 'เกิดข้อผิดพลาด', true);
+    }
+  });
+}
+
+function loadEvaluations() {
+  api('getEvaluations', CONFIG.ADMIN ? {} : {teacherName: CONFIG.USER.name}).then(function(r){
+    if (!r.success) return;
+    var tbody = document.getElementById('evalTable');
+    if (r.evaluations.length) {
+      tbody.innerHTML = r.evaluations.map(function(e){
+        return '<tr><td>'+fmtDateTime(e.timestamp)+'</td><td>'+esc(e.teacher)+'</td><td>'+fmtDate(e.date)+'</td><td>'+badge(e.qualityLevel)+'</td><td>'+esc(e.evaluator)+'</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>ยังไม่มีผลการประเมิน</p></td></tr>';
+    }
+  });
+}
+
+/* ===== ADMIN ===== */
+function showAdminTab(tab) {
+  ['adminManage','adminCheck','adminSettings'].forEach(function(id){document.getElementById(id).style.display='none';});
+  ['admTab1','admTab2','admTab3'].forEach(function(id){
+    document.getElementById(id).className='btn btn-outline';
+    document.getElementById(id).style.justifyContent='center';
+  });
+  if (tab==='manage') { document.getElementById('adminManage').style.display='block'; document.getElementById('admTab1').className='btn btn-primary'; }
+  if (tab==='check') { document.getElementById('adminCheck').style.display='block'; document.getElementById('admTab2').className='btn btn-primary'; }
+  if (tab==='settings') { document.getElementById('adminSettings').style.display='block'; document.getElementById('admTab3').className='btn btn-primary'; }
+}
+
+function loadAdminBookings() {
+  var params = {};
+  var status = document.getElementById('admFilterStatus').value;
+  var dFrom = document.getElementById('admFilterDateFrom').value;
+  var dTo = document.getElementById('admFilterDateTo').value;
+  if (status) params.status = status;
+  if (dFrom) params.dateFrom = dFrom;
+  if (dTo) params.dateTo = dTo;
+  api('getBookings', params).then(function(r){
+    if (!r.success) return;
+    var tbody = document.getElementById('adminBookingTable');
+    if (r.bookings.length) {
+      tbody.innerHTML = r.bookings.map(function(b){
+        var actions = '';
+        if (b.status==='รอดำเนินการ') {
+          actions = '<button class="btn btn-primary btn-sm" onclick="updateBooking('+b.row+',\'ยืนยันแล้ว\')">✅</button> ';
+          actions += '<button class="btn btn-danger btn-sm" onclick="updateBooking('+b.row+',\'ปฏิเสธ\')">❌</button>';
+        } else if (b.status==='ยืนยันแล้ว') {
+          actions = '<button class="btn btn-primary btn-sm" onclick="updateBooking('+b.row+',\'นิเทศแล้ว\')">📝 นิเทศแล้ว</button> ';
+          actions += '<button class="btn btn-danger btn-sm" onclick="updateBooking('+b.row+',\'ปฏิเสธ\')">❌</button>';
+        } else {
+          actions = '<button class="btn btn-danger btn-sm" onclick="deleteBooking('+b.row+')">🗑️</button>';
+        }
+        return '<tr><td>'+fmtDate(b.date)+'</td><td>'+esc(b.time)+'</td><td>'+esc(b.teacher)+'</td><td>'+esc(b.department)+'</td><td>'+esc(b.subject)+'</td><td>'+badge(b.status)+'</td><td>'+actions+'</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>ไม่มีรายการ</p></td></tr>';
+    }
+  });
+}
+
+function updateBooking(row, status) {
+  api('updateBookingStatus', {row: row, status: status}).then(function(r){
+    if (r.success) {
+      showToast('✅ อัพเดทสถานะสำเร็จ');
+      loadAdminBookings();
+    } else {
+      showToast(r.error, true);
+    }
+  });
+}
+
+function deleteBooking(row) {
+  if (!confirm('ต้องการลบการจองนี้?')) return;
+  api('deleteBooking', {row: row}).then(function(r){
+    if (r.success) {
+      showToast('✅ ลบการจองสำเร็จ');
+      loadAdminBookings();
+    } else {
+      showToast(r.error, true);
+    }
+  });
+}
+
+function loadAdminFiles() {
+  var params = {};
+  var ft = document.getElementById('admFilterFileType').value;
+  var fs = document.getElementById('admFilterFileStatus').value;
+  if (ft) params.fileType = ft;
+  if (fs) params.status = fs;
+  api('getFiles', params).then(function(r){
+    if (!r.success) return;
+    var tbody = document.getElementById('adminFileTable');
+    if (r.files.length) {
+      tbody.innerHTML = r.files.map(function(f){
+        var link = f.fileURL ? '<a href="'+esc(f.fileURL)+'" target="_blank">🔗</a>' : '-';
+        var actions = '';
+        if (f.status==='รอตรวจสอบ') {
+          actions = '<button class="btn btn-primary btn-sm" onclick="updateFile('+f.row+',\'ผ่าน\')">✅ ผ่าน</button> ';
+          actions += '<button class="btn btn-danger btn-sm" onclick="updateFile('+f.row+',\'ปรับปรุง\')">✏️ ขอแก้ไข</button>';
+        } else {
+          actions = '<button class="btn btn-secondary btn-sm" onclick="updateFile('+f.row+',\'รอตรวจสอบ\')">🔄 รีเซ็ต</button>';
+        }
+        return '<tr><td>'+fmtDateTime(f.timestamp)+'</td><td>'+esc(f.teacher)+'</td><td>'+esc(f.fileType)+'</td><td>'+esc(f.fileName)+'</td><td>'+badge(f.status)+'</td><td>'+link+'</td><td>'+actions+'</td></tr>';
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>ไม่มีรายการ</p></td></tr>';
+    }
+  });
+}
+
+function updateFile(row, status) {
+  api('updateFileStatus', {row: row, status: status}).then(function(r){
+    if (r.success) {
+      showToast('✅ อัพเดทสถานะไฟล์สำเร็จ');
+      loadAdminFiles();
+    } else {
+      showToast(r.error, true);
+    }
+  });
+}
+
+function initSheets() {
+  api('initSheets').then(function(r){
+    if (r.success) showToast('✅ สร้าง/ตรวจสอบ Sheet สำเร็จ');
+    else showToast(r.error, true);
+  });
+}
+
+/* ===== REPORTS ===== */
+function loadDeptReport() {
+  var dept = document.getElementById('rptDept').value;
+  if (!dept) { showToast('กรุณาเลือกกลุ่มสาระ', true); return; }
+  api('getDepartmentReport', {department: dept}).then(function(r){
+    if (!r.success) return;
+    var div = document.getElementById('deptReportResult');
+    if (r.teachers.length) {
+      var html = '<div class="table-wrap"><table><thead><tr><th>ชื่อครู</th><th>จำนวนจอง</th><th>นิเทศแล้ว</th><th>ส่งไฟล์</th><th>ประเมินแล้ว</th></tr></thead><tbody>';
+      r.teachers.forEach(function(t){
+        html += '<tr><td>'+esc(t.name)+'</td><td>'+t.bookings+'</td><td>'+t.completed+'</td><td>'+t.files+'</td><td>'+t.evaluated+'</td></tr>';
+      });
+      html += '</tbody></table></div>';
+      div.innerHTML = html;
+    } else {
+      div.innerHTML = '<div class="empty-state"><p>ไม่มีข้อมูลในกลุ่มสาระนี้</p></div>';
+    }
+  });
+}
+
+/* ===== MY REPORT ===== */
+function loadMyReport() {
+  api('getTeacherReport', {teacherName: CONFIG.USER.name}).then(function(r){
+    if (!r.success) return;
+    var div = document.getElementById('myReportContent');
+    var html = '<div class="grid grid-4" style="margin-bottom:16px">';
+    html += '<div class="stat-card"><div class="stat-icon blue">📅</div><div class="stat-info"><h3>'+(r.totalBookings||0)+'</h3><p>การจองทั้งหมด</p></div></div>';
+    html += '<div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><h3>'+(r.completedBookings||0)+'</h3><p>นิเทศแล้ว</p></div></div>';
+    html += '<div class="stat-card"><div class="stat-icon purple">📁</div><div class="stat-info"><h3>'+(r.totalFiles||0)+'</h3><p>ไฟล์งาน</p></div></div>';
+    html += '<div class="stat-card"><div class="stat-icon yellow">📝</div><div class="stat-info"><h3>'+(r.totalEvaluations||0)+'</h3><p>ผลประเมิน</p></div></div>';
+    html += '</div>';
+    if (r.bookings && r.bookings.length) {
+      html += '<div class="report-section"><h3>ประวัติการจอง</h3><div class="table-wrap"><table><thead><tr><th>วันที่</th><th>เวลา</th><th>วิชา</th><th>สถานะ</th></tr></thead><tbody>';
+      r.bookings.forEach(function(b){
+        html += '<tr><td>'+fmtDate(b.date)+'</td><td>'+esc(b.time)+'</td><td>'+esc(b.subject)+'</td><td>'+badge(b.status)+'</td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    }
+    if (r.evaluations && r.evaluations.length) {
+      html += '<div class="report-section"><h3>ผลการประเมิน</h3>';
+      r.evaluations.forEach(function(e){
+        html += '<div class="card" style="margin-bottom:12px">';
+        html += '<p><strong>วันที่:</strong> '+fmtDate(e.date)+' | <strong>ระดับ:</strong> '+badge(e.qualityLevel)+' | <strong>ผู้ประเมิน:</strong> '+esc(e.evaluator)+'</p>';
+        html += '<p style="margin-top:8px"><strong>จุดเด่น:</strong> '+esc(e.strengths)+'</p>';
+        html += '<p><strong>จุดพัฒนา:</strong> '+esc(e.improvements)+'</p>';
+        if (e.suggestions) html += '<p><strong>ข้อเสนอแนะ:</strong> '+esc(e.suggestions)+'</p>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    div.innerHTML = html;
+  });
+}
+
+/* ===== UTILS ===== */
+function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+function fmtDate(d) {
+  if (!d) return '-';
+  try {
+    var parts = String(d).split('T')[0].split('-');
+    if (parts.length<3) return d;
+    return parts[2]+'/'+parts[1]+'/'+parts[0];
+  } catch(e) { return d; }
+}
+function fmtDateTime(dt) {
+  if (!dt) return '-';
+  try {
+    var d = new Date(dt);
+    return d.toLocaleDateString('th-TH') + ' ' + d.toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) { return dt; }
+}
+function badge(status) {
+  var map = {
+    'รอดำเนินการ':'badge-pending','ยืนยันแล้ว':'badge-confirmed','นิเทศแล้ว':'badge-completed',
+    'ปฏิเสธ':'badge-rejected','รอตรวจสอบ':'badge-waiting','ผ่าน':'badge-approved','ปรับปรุง':'badge-revision',
+    'ดีมาก':'badge-quality','ดี':'badge-confirmed','พอใช้':'badge-pending','ปรับปรุง':'badge-revision'
+  };
+  return '<span class="badge '+(map[status]||'badge-pending')+'">'+esc(status)+'</span>';
+}
+
+function openModal(title, bodyHtml, footerHtml) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalFooter').innerHTML = footerHtml || '';
+  document.getElementById('modalOverlay').classList.add('active');
+}
+function closeModal(e) {
+  if (!e || e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+/* ===== INIT ===== */
+(function(){
+  var saved = localStorage.getItem('nited1_config');
+  if (saved) {
+    try {
+      var cfg = JSON.parse(saved);
+      CONFIG.APPS_SCRIPT_URL = cfg.url || '';
+    } catch(e){}
+  }
+  if (!CONFIG.APPS_SCRIPT_URL) {
+    document.getElementById('loginPage').innerHTML = '<div class="login-card"><div class="login-logo"><div class="icon">⚙️</div><h2>ตั้งค่าระบบ</h2><p>กรอก Google Apps Script Web App URL</p></div><div class="form-group"><label>Apps Script URL</label><input type="url" id="setupUrl" placeholder="https://script.google.com/macros/s/.../exec"></div><button class="btn btn-primary" style="width:100%;justify-content:center" onclick="setupUrl()">💾 บันทึก</button></div>';
+    document.getElementById('loginPage').style.display = 'flex';
+  }
+})();
+
+function setupUrl() {
+  var url = document.getElementById('setupUrl').value.trim();
+  if (!url) { showToast('กรุณากรอก URL', true); return; }
+  CONFIG.APPS_SCRIPT_URL = url;
+  localStorage.setItem('nited1_config', JSON.stringify({url: url}));
+  showToast('✅ บันทึกสำเร็จ กรุณาโหลดหน้าเว็บใหม่');
+  setTimeout(function(){location.reload();}, 1500);
+}
+</script>
+</body>
+</html>
