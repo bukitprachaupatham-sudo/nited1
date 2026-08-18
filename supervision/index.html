@@ -187,33 +187,35 @@ tr:hover td{background:var(--card2)}
       <div class="login-tab" onclick="switchLoginTab('admin')">ผู้ดูแลระบบ</div>
     </div>
     <div class="login-error" id="loginError"></div>
-    <div id="teacherFields">
-      <div class="form-group">
-        <label>ชื่อ-นามสกุล</label>
-        <input type="text" id="loginName" placeholder="กรอกชื่อ-นามสกุล">
+    <form id="loginForm" onsubmit="return doLogin(event)">
+      <div id="teacherFields">
+        <div class="form-group">
+          <label>ชื่อ-นามสกุล *</label>
+          <input type="text" id="loginName" placeholder="กรอกชื่อ-นามสกุล" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label>กลุ่มสาระการเรียนรู้</label>
+          <select id="loginDept">
+            <option value="">-- เลือกกลุ่มสาระ --</option>
+            <option>กลุ่มสาระภาษาไทย</option>
+            <option>กลุ่มสาระคณิตศาสตร์</option>
+            <option>กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
+            <option>กลุ่มสาระสังคมศึกษา ศาสนาและวัฒนธรรม</option>
+            <option>กลุ่มสาระสุขศึกษาและพลศึกษา</option>
+            <option>กลุ่มสาระศิลปะ</option>
+            <option>กลุ่มสาระการงานอาชีพและเทคโนโลยี</option>
+            <option>กลุ่มสาระภาษาต่างประเทศ</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label>กลุ่มสาระการเรียนรู้</label>
-        <select id="loginDept">
-          <option value="">-- เลือกกลุ่มสาระ --</option>
-          <option>กลุ่มสาระภาษาไทย</option>
-          <option>กลุ่มสาระคณิตศาสตร์</option>
-          <option>กลุ่มสาระวิทยาศาสตร์และเทคโนโลยี</option>
-          <option>กลุ่มสาระสังคมศึกษา ศาสนาและวัฒนธรรม</option>
-          <option>กลุ่มสาระสุขศึกษาและพลศึกษา</option>
-          <option>กลุ่มสาระศิลปะ</option>
-          <option>กลุ่มสาระการงานอาชีพและเทคโนโลยี</option>
-          <option>กลุ่มสาระภาษาต่างประเทศ</option>
-        </select>
+      <div id="adminFields" style="display:none">
+        <div class="form-group">
+          <label>รหัสผ่านผู้ดูแล *</label>
+          <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน" autocomplete="current-password">
+        </div>
       </div>
-    </div>
-    <div id="adminFields">
-      <div class="form-group">
-        <label>รหัสผ่าน</label>
-        <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน">
-      </div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doLogin()">เข้าสู่ระบบ</button>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">เข้าสู่ระบบ</button>
+    </form>
   </div>
 </div>
 
@@ -604,46 +606,58 @@ function switchLoginTab(tab) {
   });
   document.getElementById('teacherFields').style.display = tab==='teacher' ? 'block' : 'none';
   document.getElementById('adminFields').style.display = tab==='admin' ? 'block' : 'none';
+  document.getElementById('loginError').style.display = 'none';
 }
 
-function doLogin() {
+function doLogin(e) {
+  if (e) e.preventDefault();
   var errEl = document.getElementById('loginError');
   errEl.style.display = 'none';
   var isAdmin = document.querySelector('.login-tab.active').textContent.includes('ผู้ดูแล');
   if (isAdmin) {
-    var pw = document.getElementById('loginPassword').value;
-    if (!pw) { errEl.textContent='กรุณากรอกรหัสผ่าน'; errEl.style.display='block'; return; }
+    var pw = (document.getElementById('loginPassword').value || '').trim();
+    if (!pw) {
+      errEl.textContent = 'กรุณากรอกรหัสผ่าน';
+      errEl.style.display = 'block';
+      return false;
+    }
     if (pw === 'admin') {
       CONFIG.USER = {name:'ผู้ดูแลระบบ', dept:'admin'};
       CONFIG.ADMIN = true;
+      localStorage.setItem('nited1_user', JSON.stringify(CONFIG.USER));
+      localStorage.setItem('nited1_admin', 'true');
       enterApp();
-      api('login', {password: pw}).catch(function(){});
     } else {
-      api('login', {password: pw}).then(function(r){
-        if (r.success && r.role==='admin') {
-          CONFIG.USER = {name:'ผู้ดูแลระบบ', dept:'admin'};
-          CONFIG.ADMIN = true;
-          enterApp();
-        } else {
-          errEl.textContent='รหัสผ่านไม่ถูกต้อง'; errEl.style.display='block';
-        }
-      }).catch(function(){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; errEl.style.display='block'; });
+      errEl.textContent = 'รหัสผ่านไม่ถูกต้อง';
+      errEl.style.display = 'block';
     }
   } else {
-    var name = document.getElementById('loginName').value.trim();
+    var name = (document.getElementById('loginName').value || '').trim();
     var dept = document.getElementById('loginDept').value;
-    if (!name) { errEl.textContent='กรุณากรอกชื่อ'; errEl.style.display='block'; return; }
+    if (!name) {
+      errEl.textContent = 'กรุณากรอกชื่อ-นามสกุล';
+      errEl.style.display = 'block';
+      document.getElementById('loginName').focus();
+      return false;
+    }
     CONFIG.USER = {name: name, dept: dept};
     CONFIG.ADMIN = false;
+    localStorage.setItem('nited1_user', JSON.stringify(CONFIG.USER));
+    localStorage.setItem('nited1_admin', 'false');
     enterApp();
   }
+  return false;
 }
 
 function doLogout() {
   CONFIG.USER = null;
   CONFIG.ADMIN = false;
+  localStorage.removeItem('nited1_user');
+  localStorage.removeItem('nited1_admin');
   document.getElementById('appPage').style.display = 'none';
   document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
 }
 
 function enterApp() {
@@ -1192,6 +1206,21 @@ function closeModal(e) {
       var cfg = JSON.parse(saved);
       if (cfg.url) CONFIG.APPS_SCRIPT_URL = cfg.url;
     } catch(e){}
+  }
+  var savedUser = localStorage.getItem('nited1_user');
+  var savedAdmin = localStorage.getItem('nited1_admin');
+  if (savedUser) {
+    try {
+      CONFIG.USER = JSON.parse(savedUser);
+      CONFIG.ADMIN = savedAdmin === 'true';
+      if (CONFIG.USER && CONFIG.USER.name) {
+        enterApp();
+        return;
+      }
+    } catch(e) {
+      localStorage.removeItem('nited1_user');
+      localStorage.removeItem('nited1_admin');
+    }
   }
 })();
 
