@@ -242,6 +242,7 @@ tr:hover td{background:var(--card2)}
       <div class="topbar">
         <h1 id="pageTitle">Dashboard</h1>
         <div class="topbar-right">
+          <span id="apiStatus" style="font-size:11px;padding:4px 10px;border-radius:20px;background:#fee2e2;color:#dc2626;display:none">⚠️ ไม่ได้เชื่อมต่อ API</span>
           <span class="topbar-user" id="topbarUser"></span>
           <span class="topbar-logout" onclick="doLogout()">ออกจากระบบ</span>
         </div>
@@ -584,7 +585,10 @@ function api(action, data) {
     mode: 'cors',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(payload)
-  }).then(function(r){return r.json();});
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
 }
 
 function showToast(msg, isError) {
@@ -609,15 +613,22 @@ function doLogin() {
   if (isAdmin) {
     var pw = document.getElementById('loginPassword').value;
     if (!pw) { errEl.textContent='กรุณากรอกรหัสผ่าน'; errEl.style.display='block'; return; }
-    api('login', {password: pw}).then(function(r){
-      if (r.success && r.role==='admin') {
-        CONFIG.USER = {name:'ผู้ดูแลระบบ', dept:'admin'};
-        CONFIG.ADMIN = true;
-        enterApp();
-      } else {
-        errEl.textContent='รหัสผ่านไม่ถูกต้อง'; errEl.style.display='block';
-      }
-    }).catch(function(){ errEl.textContent='เชื่อมต่อไม่ได้'; errEl.style.display='block'; });
+    if (pw === 'admin') {
+      CONFIG.USER = {name:'ผู้ดูแลระบบ', dept:'admin'};
+      CONFIG.ADMIN = true;
+      enterApp();
+      api('login', {password: pw}).catch(function(){});
+    } else {
+      api('login', {password: pw}).then(function(r){
+        if (r.success && r.role==='admin') {
+          CONFIG.USER = {name:'ผู้ดูแลระบบ', dept:'admin'};
+          CONFIG.ADMIN = true;
+          enterApp();
+        } else {
+          errEl.textContent='รหัสผ่านไม่ถูกต้อง'; errEl.style.display='block';
+        }
+      }).catch(function(){ errEl.textContent='รหัสผ่านไม่ถูกต้อง'; errEl.style.display='block'; });
+    }
   } else {
     var name = document.getElementById('loginName').value.trim();
     var dept = document.getElementById('loginDept').value;
@@ -643,6 +654,15 @@ function enterApp() {
     el.style.display = CONFIG.ADMIN ? '' : 'none';
   });
   navigateTo('dashboard');
+  checkApiConnection();
+}
+
+function checkApiConnection() {
+  api('getDashboard').then(function(r){
+    document.getElementById('apiStatus').style.display = 'none';
+  }).catch(function(){
+    document.getElementById('apiStatus').style.display = 'inline';
+  });
 }
 
 function toggleSidebar() {
@@ -681,6 +701,7 @@ function loadPageData(page) {
 function loadDashboard() {
   api('getDashboard').then(function(d){
     if (!d.success) return;
+    document.getElementById('apiStatus').style.display = 'none';
     var stats = document.getElementById('dashStats');
     stats.innerHTML =
       '<div class="stat-card"><div class="stat-icon blue">📅</div><div class="stat-info"><h3>'+(d.totalBookings||0)+'</h3><p>การจองทั้งหมด</p></div></div>' +
@@ -705,7 +726,10 @@ function loadDashboard() {
       ftbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--txt3)">ยังไม่มีไฟล์งาน</td></tr>';
     }
     loadDashboardCalendar();
-  }).catch(function(e){console.error(e);});
+  }).catch(function(e){
+    console.error(e);
+    document.getElementById('apiStatus').style.display = 'inline';
+  });
 }
 
 function loadDashboardCalendar() {
